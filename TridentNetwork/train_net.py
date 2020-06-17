@@ -25,4 +25,30 @@ def setup(args):
     default_setup(cfg, args)
     return cfg_content, cfg
 
+def main(args):
+    cfg = setup(args)
 
+    if args.eval_only:
+        model = Trainer.build_model(cfg)
+        DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(
+            cfg.MODEL.WEIGHTS, resume=args.resume
+        )
+        res = Trainer.test(cfg, model)
+        return res
+
+    trainer = Trainer(cfg)
+    trainer.resume_or_load(resume=args.resume)
+    return trainer.train()
+
+
+if __name__ == "__main__":
+    args = default_argument_parser().parse_args()
+    print("Command Line Args:", args)
+    launch(
+        main,
+        args.num_gpus,
+        num_machines=args.num_machines,
+        machine_rank=args.machine_rank,
+        dist_url=args.dist_url,
+        args=(args,),
+    )
