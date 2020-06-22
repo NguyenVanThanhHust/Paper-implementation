@@ -129,7 +129,7 @@ def build_trident_resnet_backbone(cfg, input_shape):
     norm = cfg.MODEL.RESNETS.NORM
     stem = BasicStem(
         in_channels=input_shape.channels,
-        out_channels = cfg.MODEL.RESNET.STEM_OUT_CHANNELS, 
+        out_channels = cfg.MODEL.RESNETS.STEM_OUT_CHANNELS, 
         norm = norm
     )
     freeze_at = cfg.MODEL.BACKBONE.FREEZE_AT

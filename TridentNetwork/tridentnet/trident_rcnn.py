@@ -41,7 +41,7 @@ class TridentRes5ROIHeads(Res5ROIHeads):
         
         """
         num_branch = self.num_branch if self.training or not self.trident_fast else 1
-        all_targes = targets * num_branch if targets is nont None else None
+        all_targes = targets * num_branch if targets is not None else None
         pred_instances, losses = super().forward(images, features, proposals, all_targets)
         del images, all_targets, targets
 
@@ -58,7 +58,7 @@ class TridentRes5ROIHeads(Res5ROIHeads):
             return pred_instances, {}
 
 @ROI_HEADS_REGISTRY.register()
-class TridentStandardROIHeads(StandardHOIHeads):
+class TridentStandardROIHeads(StandardROIHeads):
     def __init__(self, cfg, input_shape):
         super(TridentStandardROIHeads, self).__init__(cfg, input_shape)
         
