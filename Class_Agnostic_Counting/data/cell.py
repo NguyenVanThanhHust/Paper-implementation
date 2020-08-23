@@ -1,5 +1,6 @@
 from __future__ import print_function, division
 import os
+import sys
 import os.path as osp
 import torch
 import cv2
@@ -22,18 +23,18 @@ class Cell_Dataset(Dataset):
         self.list_file = sorted(list_file)
         self.set_idx = set([int(x[0:3]) for x in list_file])
         self.transform = transform
-        print(self.set_idx)
+        # print(self.set_idx)
 
     def __len__(self):
-        return len(self.set_idx)
+        return len(self.set_idx) - 1
 
     def __getitem__(self, idx):
-        im_name = str(idx).zfill(3) + "cell.png"
+        im_name = str(idx + 1).zfill(3) + "cell.png"
         im_path = osp.join(self.data_folder, im_name)
-        label_name = str(idx).zfill(3) + "dots.png"
+        label_name = str(idx + 1).zfill(3) + "dots.png"
         label_path = osp.join(self.data_folder, label_name)
-        im = cv2.imread(im_path, cv2. IMREAD_COLOR)
-        label = v2.imread(label_path, cv2. IMREAD_COLOR)
+        im = Image.open(im_path).convert('RGB')
+        label = Image.open(label_path).convert('LA')
         if self.transform:
             im = self.transform(im)
             label = self.transform(label)
@@ -48,7 +49,7 @@ def test_dataloader():
     cell_dataloader = torch.utils.data.DataLoader(cell_dataset, batch_size=4, 
                                                     shuffle=True)
     for idx, (images, targets) in enumerate(cell_dataloader):
-        print(idx, image.shapes, targets)
+        print(idx, images.shape, targets.shape)
 
 if __name__ == "__main__":
     test_dataloader()
