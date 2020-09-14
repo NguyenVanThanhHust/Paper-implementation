@@ -9,6 +9,7 @@ import random as rd
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from PIL import Image
@@ -38,33 +39,37 @@ class Cell_Dataset(Dataset):
         label_path = osp.join(self.data_folder, label_name)
         im = Image.open(im_path).convert('RGB')
         label = Image.open(label_path).convert('L')
-        
+        im_size = label.size 
 
         nonzero_x, nonzero_y = np.nonzero(label)
         rd_index = rd.randint(0, len(nonzero_x) - 1)
         patch_x, patch_y = nonzero_x[rd_index], nonzero_y[rd_index]
-        while not is_in_center_area(patch_x, patch_y):
+        while not is_in_center_area(patch_x, patch_y, im_size):
             rd_index = rd.randint(0, len(nonzero_x) - 1)
             patch_x, patch_y = nonzero_x[rd_index], nonzero_y[rd_index]
 
-        bbox = [patch_x  -32, patch_y - 32, patch_x + 32, patch_y + 32]
+        bbox = [patch_x  -32, patch_y - 32, patch_x + 31, patch_y + 31]
         patch_img = im.crop(bbox)
+        
+        label = label.resize((63, 63))
         if self.transform:
             im = self.transform(im)
             patch_img = self.patch_transform(patch_img)
-            label = self.transform(label)
-        return patch_img, im, label
+        to_tensor = transforms.ToTensor()
+        label = to_tensor(label)
+        return im, patch_img, label
 
-def is_in_center_area(patch_x, patch_y):
-    if patch_x > 600 or patch_x < 200:
+def is_in_center_area(patch_x, patch_y, im_size):
+    width, height = im_size
+    if patch_x > width*0.8 or patch_x < width*0.2:
         return False
-    if patch_y > 600 or patch_y < 200:
+    if patch_y > height*0.8 or patch_y < height*0.2:
         return False
     return True
 
 def test_dataloader():
     transform = torchvision.transforms.Compose([
-        transforms.Resize((800, 800)), 
+        transforms.Resize((255, 255)), 
         transforms.ToTensor(),
     ])
      
@@ -76,5 +81,5 @@ def test_dataloader():
         if idx > 0:
             break
 
-if __name__ == "__main__":
-    test_dataloader()
+#if __name__ == "__main__":
+#    test_dataloader()

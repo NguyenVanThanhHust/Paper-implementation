@@ -23,11 +23,11 @@ class BaseNet(nn.Module):
                     *list(self.base.children())[0:6],
                     # *list(self.base.children())[6][0:2], 
                     # list(self.base.children())[7][2].conv1, 
-                    # list(self.base.children())[7][2].bn1, 
                 )
         # print(self.feature)
 
     def forward(self, x):
+#        print(x.shape)
         x = self.feature(x)
         output = x
         return output
@@ -39,6 +39,7 @@ class PatchNet(nn.Module):
         self.global_max_pool = nn.MaxPool2d(8)
 
     def forward(self, x):
+#        print(x.shape)
         x = self.base(x)
         x = self.global_max_pool(x)
         output = x
@@ -73,21 +74,20 @@ class EmbeddingNet(nn.Module):
     def forward(self, x1, x2):
         x1 = self.base(x1)
         x2 = self.patch(x2)
-        print(x1.shape)
-        print(x2.shape)
-        # x2 = x2.repeat(1, 1, 32, 32)
-        x2 = x2.repeat(1, 1, 100, 100)
+#        print(x1.shape)
+#        print(x2.shape)
+        x2 = x2.repeat(1, 1, 32, 32)
         x = torch.cat([x1, x2], dim=1)
         x = self.adapt_module(x)
         y = self.predict(x)
         return y
 
 
-# test_model = EmbeddingNet()
-# input_1 = torch.rand([4, 3, 800, 800])
-# input_2 = torch.rand([4, 3, 64, 64])
-
-# y= test_model(input_1, input_2)
-
-# print(y.shape) # torch.Size([4, 1, 63, 63])
+#test_model = EmbeddingNet()
+#input_1 = torch.rand([4, 3, 255, 255])
+#input_2 = torch.rand([4, 3, 63, 63])
+#
+#y= test_model(input_1, input_2)
+#
+#print(y.shape) # torch.Size([4, 1, 63, 63])
 

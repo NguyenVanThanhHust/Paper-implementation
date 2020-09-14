@@ -22,7 +22,7 @@ def train(args):
     adapt = args.adapt
     
     train_transforms = torchvision.transforms.Compose([
-        transforms.Resize((800, 800)), 
+        transforms.Resize((255, 255)), 
         transforms.ToTensor(),
     ])
     cell_dataset = Cell_Dataset(transform=train_transforms)
@@ -53,7 +53,7 @@ def train(args):
             inputs_im, patch_im, input_label = input_im.cuda(), patch_im.cuda(), input_label.cuda()
 
             output_heatmap = net(inputs_im, patch_im)
-
+#            print(output_heatmap.shape, input_label.shape)
             loss = criterion(output_heatmap, input_label)
 
             optimizer.zero_grad()
