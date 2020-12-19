@@ -156,3 +156,18 @@ for t in tqdm(test):
     
 print("Test accuracy: " + str(num_correct/len(test)))
 plt.hist(predictions, bins=3)
+
+
+#test SMILES string
+def evaluate_smiles(smiles_string):
+    classes = ['insoluble', 'slightly soluble', 'soluble']
+    G = read_smiles(smiles_string, explicit_hydrogen=True) #decode smiles string
+    feature = element_to_onehot(np.asarray(G.nodes(data='element'))[:, 1]) #convert element to one-hot vector
+    edges = np.asarray(G.edges) #get edge array
+    index = np.asarray([edges[:,0], edges[:,1]]) #reformat edge array to torch geometric suitable format
+    d = Data(x=torch.tensor(feature, dtype=torch.float),edge_index=torch.tensor(index, dtype=torch.long)) #create torch gemoetry Data object
+    data = d.to(device) #send data to device memory
+    model.eval() #set model to evaluate mode
+    print(classes[torch.argmax(torch.softmax(model(data), dim=0)).item()]) #evaluate the test data
+
+evaluate_smiles('C(C(C1C(=C(C(=O)O1)O)O)O)O') #test out the model on Vitamin C
