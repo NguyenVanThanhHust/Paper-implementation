@@ -140,3 +140,19 @@ for epoch in range(32): #run for epochs of training
     loss.backward() #compute gradients
     optimizer.step() #apply optimization
     print('Epoch: {:03d}, Average loss: {:.5f}, Accuracy: {:.5f}'.format(epoch, sum_loss/len(train), num_correct/len(train)))
+
+
+
+#test the model and display a histogram of the outputs
+num_correct = 0
+model.eval()
+predictions = list()
+for t in tqdm(test):
+    d = t.to(device)
+    out = model(d)
+    if torch.argmax(out) == torch.argmax(d.y): #if prediction is correct, increment counter for accuracy calculation
+            num_correct += 1
+    predictions.append(torch.argmax(out).item())
+    
+print("Test accuracy: " + str(num_correct/len(test)))
+plt.hist(predictions, bins=3)
