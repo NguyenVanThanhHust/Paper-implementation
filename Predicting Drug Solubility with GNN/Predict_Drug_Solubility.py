@@ -117,4 +117,26 @@ class Network(torch.nn.Module):
         x = self.lin2(x)
         return x
 
+#set up device and create model
+device = torch.device(‘cuda’ if torch.cuda.is_available() else ‘cpu’) #use CUDA if available
+model = Net().to(device) #create network and send to the device memory
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4) #use Adam optimizer
+CSE = CrossEntropyLoss()
 
+#train model
+model.train() #set model to training mode
+for epoch in range(32): #run for epochs of training
+    sum_loss = 0 #used to compute average loss in an epoch
+    num_correct = 0
+    random.shuffle(train) #shuffle the training data each epoch
+    for d in tqdm(train): #go over each training point
+        data = d.to(device) #send data to device
+        optimizer.zero_grad() #zero gradients
+        out = model(data) #evaluate data point
+        if torch.argmax(out) == torch.argmax(data.y): #if prediction is correct, increment counter for accuracy calculation
+            num_correct += 1
+    loss = CSE(torch.reshape(out, [1, 3]), torch.reshape(torch.argmax(data.y),[1])) #compute loss
+    sum_loss += float(loss) #add loss value to aggregate loss
+    loss.backward() #compute gradients
+    optimizer.step() #apply optimization
+    print('Epoch: {:03d}, Average loss: {:.5f}, Accuracy: {:.5f}'.format(epoch, sum_loss/len(train), num_correct/len(train)))
